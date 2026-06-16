@@ -1,4 +1,4 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { config } from './config.js';
 import { ChatRequest, ChatResponse } from './types.js';
 import crypto from 'crypto';

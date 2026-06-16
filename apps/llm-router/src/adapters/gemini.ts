@@ -1,6 +1,6 @@
 import { BaseAdapter } from './base.js';
 import { ChatRequest, ChatResponse } from '../types.js';
-import { config } from '../config.js';
+import { config, providers } from '../config.js';
 
 export class GeminiAdapter extends BaseAdapter {
   id = 'gemini';
@@ -17,7 +17,7 @@ export class GeminiAdapter extends BaseAdapter {
       .filter((m) => m.role === 'system')
       .map((m) => ({ parts: [{ text: m.content }] }));
 
-    const url = `${config.providers[0].baseUrl}/${modelName}:generateContent?key=${config.GEMINI_API_KEY}`;
+    const url = `${providers[0].baseUrl}/${modelName}:generateContent?key=${config.GEMINI_API_KEY}`;
 
     const body: any = {
       contents,
@@ -42,10 +42,10 @@ export class GeminiAdapter extends BaseAdapter {
       throw new Error(`Gemini error ${response.status}: ${text}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     const content = data.candidates?.[0]?.content?.parts?.[0]?.text ?? '';
     const promptTokens = this.estimateTokens(request.messages);
-    const completionTokens = this.estimateTokens([{ role: 'assistant', content }]);
+    const completionTokens = this.estimateTokens([{ content }]);
 
     return this.createResponse(
       this.id,

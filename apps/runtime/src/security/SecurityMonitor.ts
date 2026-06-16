@@ -1,4 +1,4 @@
-import IORedis from 'ioredis';
+import { Redis } from 'ioredis';
 import { AgentEvent, AgentContext } from '../types.js';
 import { SecurityAgent } from '../agents/SecurityAgent.js';
 
@@ -9,12 +9,12 @@ interface SecurityMonitorConfig {
 }
 
 export class SecurityMonitor {
-  private redis: IORedis;
+  private redis: Redis;
   private securityAgent: SecurityAgent;
   private running = false;
 
   constructor(private config: SecurityMonitorConfig) {
-    this.redis = new IORedis(config.redisUrl, { maxRetriesPerRequest: null });
+    this.redis = new Redis(config.redisUrl, { maxRetriesPerRequest: null });
     this.securityAgent = new SecurityAgent({
       agent_id: 'security_audit',
       name: 'Security / Audit',
@@ -68,8 +68,9 @@ export class SecurityMonitor {
         if (!result) continue;
 
         for (const [, messages] of result) {
-          for (const [id, fields] of messages) {
-            const payload = fields.find((f) => f === 'payload') ? fields[fields.indexOf('payload') + 1] : null;
+          for (const [, fields] of messages) {
+            const payloadIndex = fields.indexOf('payload');
+            const payload = payloadIndex === -1 ? null : fields[payloadIndex + 1];
             if (!payload) continue;
 
             const event = JSON.parse(payload) as AgentEvent;
@@ -176,12 +177,15 @@ export class SecurityMonitor {
             org_id: this.config.orgId,
           }),
         });
-        const data = await response.json();
+        const data = await response.json() as any;
         return { content: data.choices[0]?.message?.content ?? '', usage: data.usage };
       },
       events: {
-        publish: async (e: any) => {
+        publish: async (e: Omit<AgentEvent, 'event_id' | 'timestamp'>) => {
           await this.redis.xadd(e.topic, '*', 'payload', JSON.stringify(e));
+        },
+        subscribe: (topic, handler) => {
+          console.log(`Security monitor subscribed to ${topic}`, handler);
         },
       },
       log: (msg: string) => console.log(`[SecurityMonitor] ${msg}`),

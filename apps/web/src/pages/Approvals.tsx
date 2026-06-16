@@ -1,4 +1,4 @@
-import { Check, X, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Check, X, ShieldCheck } from 'lucide-react';
 
 const approvals = [
   {

@@ -1,6 +1,6 @@
 import { BaseAdapter } from './base.js';
 import { ChatRequest, ChatResponse } from '../types.js';
-import { config } from '../config.js';
+import { config, providers } from '../config.js';
 
 export class CerebrasAdapter extends BaseAdapter {
   id = 'cerebras';
@@ -8,7 +8,7 @@ export class CerebrasAdapter extends BaseAdapter {
   async chat(request: ChatRequest, modelName: string): Promise<ChatResponse> {
     if (!config.CEREBRAS_API_KEY) throw new Error('Cerebras API key not configured');
 
-    const response = await fetch(`${config.providers[2].baseUrl}/chat/completions`, {
+    const response = await fetch(`${providers[2].baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ export class CerebrasAdapter extends BaseAdapter {
       throw new Error(`Cerebras error ${response.status}: ${text}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     return {
       id: data.id,
       object: 'chat.completion',

@@ -1,6 +1,6 @@
-import Redis from 'ioredis';
+import { Redis } from 'ioredis';
 import { config } from './config.js';
-import { providers, Quotas } from './config.js';
+import { providers } from './config.js';
 
 const redis = new Redis(config.REDIS_URL);
 
@@ -19,13 +19,17 @@ export class RateLimiter {
     const tpmKey = `llm_router:${providerId}:${modelName}:tokens_min`;
     const dayTokensKey = `llm_router:${providerId}:${modelName}:tokens_day`;
 
-    const [dayCount, minCount] = await Promise.all([
-      redis.get(dayKey).then((v) => Number(v ?? 0)),
-      redis.get(minKey).then((v) => Number(v ?? 0)),
+    const [dayCount, minCount, tokenMinuteCount, tokenDayCount] = await Promise.all([
+      redis.get(dayKey).then((v: string | null) => Number(v ?? 0)),
+      redis.get(minKey).then((v: string | null) => Number(v ?? 0)),
+      redis.get(tpmKey).then((v: string | null) => Number(v ?? 0)),
+      redis.get(dayTokensKey).then((v: string | null) => Number(v ?? 0)),
     ]);
 
     if (quotas.requestsPerDay && dayCount >= quotas.requestsPerDay) return false;
     if (quotas.requestsPerMinute && minCount >= quotas.requestsPerMinute) return false;
+    if (quotas.tokensPerMinute && tokenMinuteCount >= quotas.tokensPerMinute) return false;
+    if (quotas.tokensPerDay && tokenDayCount >= quotas.tokensPerDay) return false;
 
     return true;
   }

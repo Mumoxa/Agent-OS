@@ -1,4 +1,4 @@
-import { ToolRegistry, ToolContext } from './ToolRegistry.js';
+import { ToolRegistry } from './ToolRegistry.js';
 
 export function registerTestTools(registry: ToolRegistry): void {
   registry.register({

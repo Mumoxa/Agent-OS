@@ -1,12 +1,12 @@
 import { FastifyInstance, FastifyPluginOptions } from 'fastify';
 import { z } from 'zod';
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
 import { randomUUID } from 'crypto';
 import { config } from '../config.js';
 
-const redis = new IORedis(config.REDIS_URL, { maxRetriesPerRequest: null });
-const agentQueue = new Queue('agent-runs', { connection: redis });
+const agentQueue = new Queue('agent-runs', {
+  connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+});
 
 const triggerWorkflowSchema = z.object({
   request: z.string().min(1),

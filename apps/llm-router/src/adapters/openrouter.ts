@@ -1,6 +1,6 @@
 import { BaseAdapter } from './base.js';
 import { ChatRequest, ChatResponse } from '../types.js';
-import { config } from '../config.js';
+import { config, providers } from '../config.js';
 
 export class OpenRouterAdapter extends BaseAdapter {
   id = 'openrouter';
@@ -8,7 +8,7 @@ export class OpenRouterAdapter extends BaseAdapter {
   async chat(request: ChatRequest, modelName: string): Promise<ChatResponse> {
     if (!config.OPENROUTER_API_KEY) throw new Error('OpenRouter API key not configured');
 
-    const response = await fetch(`${config.providers[3].baseUrl}/chat/completions`, {
+    const response = await fetch(`${providers[3].baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ export class OpenRouterAdapter extends BaseAdapter {
       throw new Error(`OpenRouter error ${response.status}: ${text}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     return {
       id: data.id,
       object: 'chat.completion',
