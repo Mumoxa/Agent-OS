@@ -12,11 +12,13 @@
     "deploy": "pnpm build && ./scripts/deploy.sh"
   },
   "devDependencies": {
-    "typescript": "^5.5.0",
+    "@eslint/js": "8.57.1",
     "@types/node": "^20.14.0",
-    "eslint": "^8.57.0",
+    "eslint": "8.57.1",
     "prettier": "^3.3.0",
-    "tsx": "^4.15.0"
+    "tsx": "^4.15.0",
+    "typescript": "^5.5.0",
+    "typescript-eslint": "8.61.1"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
