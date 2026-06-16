@@ -18,24 +18,22 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Type check
         run: npm run typecheck
 
-      # TODO: Replace this with a blocking lint step after a TypeScript ESLint config is added.
-      - name: Lint (non-blocking until ESLint is configured)
-        continue-on-error: true
-        run: npm run lint --if-present
+      - name: Lint
+        run: npm run lint
 
       - name: Build packages
         run: npm run build
 
       - name: Build Docker images
         run: |
-          docker build -t agent-os-api:${{ github.sha }} ./apps/api
-          docker build -t agent-os-worker:${{ github.sha }} ./apps/api -f ./apps/api/Dockerfile.worker
-          docker build -t agent-os-llm-router:${{ github.sha }} ./apps/llm-router
+          docker build -t agent-os-api:${{ github.sha }} -f apps/api/Dockerfile .
+          docker build -t agent-os-worker:${{ github.sha }} -f apps/api/Dockerfile.worker .
+          docker build -t agent-os-llm-router:${{ github.sha }} -f apps/llm-router/Dockerfile .
 
       - name: Save images as artifacts
         run: |
