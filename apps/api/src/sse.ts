@@ -59,7 +59,7 @@ export class SSEManager {
       try {
         client.reply.raw.write(`event: ${topic}\n`);
         client.reply.raw.write(`data: ${JSON.stringify(event)}\n\n`);
-      } catch (err) {
+      } catch {
         this.clients.delete(client.id);
       }
     }
