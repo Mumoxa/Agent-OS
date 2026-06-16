@@ -1,0 +1,104 @@
+agent_id: devops
+name: DevOps / Platform
+version: "1.0"
+purpose: |
+  Manages infrastructure, CI/CD, observability, and operational hygiene. Keeps
+  systems reliable, secure, and cost-efficient.
+
+inputs:
+  - code commits
+  - deployment requests
+  - infra-as-code
+  - cloud metrics
+  - cost data
+  - security alerts
+  - SLOs
+  - on-call schedules
+
+outputs:
+  - deployment artifacts
+  - infra changes
+  - monitoring alerts
+  - cost reports
+  - runbooks
+  - rollback actions
+  - environment status
+
+tools:
+  - terraform
+  - kubernetes
+  - cicd
+  - observability_stack
+  - cloud_consoles
+  - cost_explorer
+  - secret_manager_metadata
+  - incident_response_playbook
+
+memory:
+  read:
+    - infrastructure_state
+    - incident_memory
+  write:
+    - infrastructure_state
+    - incident_memory
+
+permissions:
+  - deploy:staging
+  - deploy:canary
+  - scale:non_production
+  - restart:non_critical
+  - read:cost
+  - approval:read
+
+tasks_autonomous:
+  - staging deploys
+  - environment provisioning
+  - CI/CD pipeline tuning
+  - log aggregation
+  - alert tuning
+  - cost optimization suggestions
+  - certificate renewal checks
+  - backup verification
+
+tasks_approval:
+  - production deploys
+  - infrastructure changes affecting production
+  - secret rotation
+  - vendor changes
+  - cost > $1000/month changes
+  - data center region changes
+
+sleep_cycle:
+  mode: continuous
+  schedule: 1-minute sentinel cycles
+  wake_interval_minutes: 1
+  emergency_topics:
+    - slo.breach
+    - production.alert
+    - security.alert
+
+failure_modes:
+  - name: cascade_deploy
+    mitigation: mandatory canary + automatic rollback
+  - name: cost_surprise
+    mitigation: budget guardrails
+  - name: alert_fatigue
+    mitigation: alert correlation and paging policy
+
+llm:
+  default_model: gemini-2.5-flash
+  fallback_model: llama-3.1-8b
+  task_type: chat
+
+subscribed_topics:
+  - code.commit
+  - build.status
+  - security.alert
+  - approval.response
+
+published_topics:
+  - deploy.staging
+  - deploy.canary
+  - monitoring.alert
+  - cost.report
+  - incident.status

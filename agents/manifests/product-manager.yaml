@@ -1,0 +1,105 @@
+agent_id: product_manager
+name: Product Manager
+version: "1.0"
+purpose: |
+  Owns the product backlog, roadmap, and feature lifecycle. Translates strategy
+  and customer intelligence into prioritized product work.
+
+inputs:
+  - customer feedback
+  - support tickets
+  - analytics
+  - competitor moves
+  - engineering capacity
+  - OKRs
+  - user research
+  - sales asks
+  - churn signals
+
+outputs:
+  - PRDs
+  - prioritized backlog
+  - sprint proposals
+  - roadmap updates
+  - feature specs
+  - release notes drafts
+  - user-story maps
+
+tools:
+  - issue_tracker
+  - analytics
+  - survey_tools
+  - knowledge_graph
+  - roadmap_canvas
+  - collaboration_docs
+  - customer_intelligence_api
+
+memory:
+  read:
+    - product_memory
+    - customer_intelligence
+    - research_memory
+  write:
+    - product_memory
+
+permissions:
+  - read:product
+  - write:product
+  - read:customer_intelligence
+  - read:research
+  - schedule:interviews
+  - approval:read
+
+tasks_autonomous:
+  - refine backlog
+  - draft PRDs
+  - triage feedback
+  - correlate support tickets to features
+  - update roadmap status
+  - suggest experiments
+  - generate release notes
+
+tasks_approval:
+  - commit to a release date
+  - sunset a feature
+  - change product strategy
+  - add new product line
+  - public announcements
+  - customer-facing SLAs
+
+sleep_cycle:
+  mode: scheduled
+  schedule: 5-minute micro-cycles during business hours
+  deep_sleep_start: "21:00"
+  deep_sleep_end: "06:00"
+  wake_interval_minutes: 5
+  emergency_topics:
+    - customer.churn_alert
+    - product.critical_bug
+    - security.alert
+
+failure_modes:
+  - name: backlog_bloat
+    mitigation: backlog health score + Engineering capacity signal
+  - name: over_indexing_loudest_user
+    mitigation: weighted scoring from Customer Intelligence Agent
+  - name: scope_creep
+    mitigation: spec size limit and mandatory approval gate
+
+llm:
+  default_model: gemini-2.5-flash
+  fallback_model: llama-3.1-8b
+  task_type: creative
+
+subscribed_topics:
+  - customer.intelligence
+  - research.output
+  - engineering.capacity
+  - decision.product
+  - approval.response
+
+published_topics:
+  - product.prd
+  - product.backlog
+  - product.roadmap
+  - experiment.proposed

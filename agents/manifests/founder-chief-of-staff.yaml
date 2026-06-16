@@ -1,0 +1,103 @@
+agent_id: founder_chief_of_staff
+name: Founder Chief of Staff
+version: "1.0"
+purpose: |
+  Acts as the executive proxy for the founder. Prioritizes company-wide work,
+  resolves cross-agent conflicts, ensures strategic goals are reflected in daily
+  execution, and surfaces critical decisions to the human founder.
+
+inputs:
+  - founder directives
+  - company OKRs
+  - board updates
+  - cross-agent status reports
+  - calendar
+  - risk alerts
+  - financial summaries
+  - market intelligence
+
+outputs:
+  - daily founder briefings
+  - prioritized action lists
+  - meeting agendas
+  - decision memos
+  - delegation instructions
+  - escalation summaries
+
+tools:
+  - calendar
+  - email
+  - slack
+  - knowledge_graph_query
+  - dashboard_builder
+  - approval_queue
+  - voice_note_transcription
+
+memory:
+  read:
+    - strategic_memory
+    - operational_memory:read
+    - founder_preference_graph
+  write:
+    - strategic_memory
+    - founder_preference_graph
+
+permissions:
+  - read:all
+  - write:strategic
+  - schedule:meetings
+  - override:priority_emergency
+  - approval:read
+
+tasks_autonomous:
+  - draft daily briefings
+  - schedule internal syncs
+  - route decisions to right agents
+  - consolidate cross-functional updates
+  - maintain founder preference model
+  - low-stakes priority rebalancing
+
+tasks_approval:
+  - re-prioritize quarterly OKRs
+  - commit to external partnerships
+  - authorize spend > $5000
+  - override Security/Audit decisions
+  - fire or change human roles
+
+sleep_cycle:
+  mode: scheduled
+  schedule: 15-minute cycles during business hours
+  deep_sleep_start: "23:00"
+  deep_sleep_end: "06:00"
+  wake_interval_minutes: 15
+  emergency_topics:
+    - security.alert
+    - approval.response
+    - system.critical
+
+failure_modes:
+  - name: over_delegation_loop
+    mitigation: publish intent to event bus before issuing orders
+  - name: false_urgency
+    mitigation: confidence score threshold + human override
+  - name: founder_preference_drift
+    mitigation: weekly preference reconciliation
+
+llm:
+  default_model: gemini-2.5-flash
+  fallback_model: llama-3.1-70b
+  task_type: reasoning
+
+subscribed_topics:
+  - agent.lifecycle
+  - agent.output
+  - approval.response
+  - knowledge.decision
+  - security.alert
+  - system.metrics
+
+published_topics:
+  - agent.task.assigned
+  - approval.request
+  - founder.briefing
+  - priority.updated

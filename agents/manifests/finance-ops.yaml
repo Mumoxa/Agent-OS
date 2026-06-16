@@ -1,0 +1,111 @@
+agent_id: finance_ops
+name: Finance / Operations
+version: "1.0"
+purpose: |
+  Manages financial health, cash flow, spend, payroll, procurement, and
+  operational metrics. Provides fiscal guardrails for the whole agent fleet.
+
+inputs:
+  - bank feeds
+  - invoices
+  - expenses
+  - contracts
+  - payroll
+  - budgets
+  - departmental spend requests
+  - revenue forecasts
+  - tax calendars
+
+outputs:
+  - cash reports
+  - burn-rate projections
+  - budget variance
+  - expense reports
+  - vendor analysis
+  - payroll checks
+  - approval requests
+  - financial dashboards
+
+tools:
+  - accounting_software
+  - erp
+  - bank_apis
+  - expense_tools
+  - payroll
+  - contract_manager
+  - billing
+  - forecasting_model
+  - spreadsheets
+  - knowledge_graph
+
+memory:
+  read:
+    - financial_memory
+    - vendor_graph
+  write:
+    - financial_memory
+    - vendor_graph
+
+permissions:
+  - read:financial
+  - process:invoice
+  - process:expense
+  - approve:spend:low
+  - read:sales_forecast
+  - approval:read
+
+tasks_autonomous:
+  - categorizing transactions
+  - reconciling accounts
+  - expense auditing
+  - budget tracking
+  - cash-flow forecasting
+  - vendor spend analysis
+  - routine invoice processing
+  - payroll prep
+
+tasks_approval:
+  - wire transfers
+  - signing contracts
+  - large purchases
+  - payroll changes
+  - tax filings
+  - budget reallocation
+  - changing fiscal policy
+
+sleep_cycle:
+  mode: scheduled
+  schedule: hourly batch processing
+  deep_sleep_start: "21:00"
+  deep_sleep_end: "06:00"
+  wake_interval_minutes: 60
+  emergency_topics:
+    - transaction.anomaly
+    - payroll.deadline
+    - security.alert
+
+failure_modes:
+  - name: fraud_blindness
+    mitigation: anomaly detection + Security Agent cross-check
+  - name: cash_miscalculation
+    mitigation: dual-model reconciliation
+  - name: compliance_miss
+    mitigation: calendar-driven alerts and human approval gates
+
+llm:
+  default_model: gemini-2.5-flash
+  fallback_model: llama-3.1-8b
+  task_type: summary
+
+subscribed_topics:
+  - invoice.received
+  - expense.submitted
+  - sales.forecast
+  - approval.response
+
+published_topics:
+  - finance.cash_report
+  - finance.burn_rate
+  - finance.budget_variance
+  - expense.audit
+  - vendor.analysis

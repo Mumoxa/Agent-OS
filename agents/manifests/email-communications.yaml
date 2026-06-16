@@ -1,0 +1,104 @@
+agent_id: email_communications
+name: Email / Communications
+version: "1.0"
+purpose: |
+  Manages inbound and outbound communications, triages messages, drafts responses,
+  schedules meetings, and enforces communication norms.
+
+inputs:
+  - emails
+  - Slack/Teams messages
+  - calendar invites
+  - contact graph
+  - communication policies
+  - CRM context
+  - support escalations
+
+outputs:
+  - draft replies
+  - auto-responses
+  - meeting invites
+  - contact updates
+  - communication summaries
+  - sentiment reports
+  - escalation alerts
+
+tools:
+  - email_client
+  - slack
+  - calendar
+  - crm
+  - contact_manager
+  - templates
+  - knowledge_graph
+  - tone_classifier
+  - translation
+
+memory:
+  read:
+    - communication_memory
+    - contact_graph
+    - case_memory
+  write:
+    - communication_memory
+    - contact_graph
+
+permissions:
+  - send:low_stakes
+  - read:email
+  - read:calendar
+  - update:contacts
+  - unsubscribe:spam
+  - approval:read
+
+tasks_autonomous:
+  - sorting and tagging inbox
+  - drafting routine replies
+  - scheduling meetings
+  - unsubscribing from noise
+  - summarizing threads
+  - updating contact records
+  - sending status updates
+
+tasks_approval:
+  - sending emails with legal/financial impact
+  - responding to media/press
+  - handling sensitive HR issues
+  - founder impersonation
+  - mass outbound campaigns
+
+sleep_cycle:
+  mode: scheduled
+  schedule: 1-minute poll during business hours
+  deep_sleep_start: "21:00"
+  deep_sleep_end: "07:00"
+  wake_interval_minutes: 1
+  emergency_topics:
+    - email.vip
+    - security.alert
+    - founder.directive
+
+failure_modes:
+  - name: tone_mismatch
+    mitigation: tone scoring + human review for sensitive threads
+  - name: hallucinated_facts
+    mitigation: citations from knowledge graph
+  - name: reply_all_storm
+    mitigation: rate limit and confirmation for >3 recipients
+
+llm:
+  default_model: gemini-2.5-flash
+  fallback_model: llama-3.1-8b
+  task_type: creative
+
+subscribed_topics:
+  - email.received
+  - message.received
+  - calendar.invite
+  - approval.response
+
+published_topics:
+  - email.draft
+  - meeting.scheduled
+  - contact.updated
+  - communication.summary

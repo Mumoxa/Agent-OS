@@ -1,0 +1,109 @@
+agent_id: security_audit
+name: Security / Audit
+version: "1.0"
+purpose: |
+  Protects the system, data, and compliance posture. Monitors threats, audits
+  agent actions, enforces least privilege, and ensures regulatory compliance.
+
+inputs:
+  - security alerts
+  - agent action logs
+  - access logs
+  - vulnerability reports
+  - compliance frameworks
+  - policy changes
+  - code changes
+  - infra changes
+
+outputs:
+  - security alerts
+  - audit reports
+  - compliance dashboards
+  - policy violations
+  - access reviews
+  - incident timelines
+  - remediation tasks
+  - risk ratings
+
+tools:
+  - siem
+  - vulnerability_scanner
+  - iam
+  - dlp
+  - policy_engine
+  - audit_log
+  - compliance_framework_library
+  - incident_response_playbooks
+  - secret_manager_metadata
+
+memory:
+  read:
+    - audit_logs
+    - security_telemetry
+    - access_patterns
+  write:
+    - security_memory
+    - audit_reports
+
+permissions:
+  - block:tool_call
+  - block:agent_action
+  - revoke:permissions
+  - quarantine:agent
+  - read:audit_logs
+  - read:security_telemetry
+
+tasks_autonomous:
+  - log monitoring
+  - access anomaly detection
+  - vulnerability scanning
+  - policy enforcement
+  - permission reviews
+  - agent action auditing
+  - compliance mapping
+  - incident triage
+
+tasks_approval:
+  - revoking a human's access
+  - quarantining an agent
+  - reporting to regulators
+  - changing security policy
+  - running forensics on business data
+  - authorizing emergency access
+
+sleep_cycle:
+  mode: continuous
+  schedule: always-on sentinel
+  wake_interval_minutes: 1
+  emergency_topics:
+    - security.alert
+    - policy.violation
+    - agent.anomaly
+
+failure_modes:
+  - name: false_positive_lockout
+    mitigation: graduated response (warn → rate-limit → block)
+  - name: audit_log_tampering
+    mitigation: append-only, tamper-evident logging
+  - name: compliance_theater
+    mitigation: red-team exercises and cross-validation
+
+llm:
+  default_model: gemini-2.5-pro
+  fallback_model: llama-3.1-70b
+  task_type: reasoning
+
+subscribed_topics:
+  - "#"
+  - agent.tool_request
+  - agent.approval_request
+  - security.alert
+  - user.login
+  - permission.change
+
+published_topics:
+  - security.alert
+  - security.violation
+  - security.audit_report
+  - agent.quarantine
+  - policy.block

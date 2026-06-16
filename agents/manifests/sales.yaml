@@ -1,0 +1,110 @@
+agent_id: sales
+name: Sales
+version: "1.0"
+purpose: |
+  Manages pipeline, qualifies leads, supports reps, drafts proposals, and
+  forecasts revenue. Accelerates deal velocity while maintaining accuracy.
+
+inputs:
+  - CRM
+  - leads
+  - marketing qualified accounts
+  - customer intelligence
+  - product info
+  - pricing
+  - contracts
+  - rep notes
+  - calendar
+  - email
+
+outputs:
+  - lead scores
+  - qualification notes
+  - outreach drafts
+  - proposals
+  - deal risk analysis
+  - forecast updates
+  - meeting summaries
+  - follow-up tasks
+
+tools:
+  - crm
+  - email
+  - calendar
+  - proposal_builder
+  - knowledge_graph
+  - dialer
+  - contract_template_library
+  - sales_enablement_docs
+  - forecasting_model
+
+memory:
+  read:
+    - sales_memory
+    - opportunity_graph
+    - customer_intelligence
+  write:
+    - sales_memory
+    - opportunity_graph
+
+permissions:
+  - draft:outreach
+  - draft:proposal
+  - update:crm
+  - schedule:demo
+  - read:pricing
+  - approval:read
+
+tasks_autonomous:
+  - lead scoring
+  - qualification research
+  - drafting emails
+  - scheduling follow-ups
+  - CRM hygiene
+  - deal risk alerts
+  - proposal assembly
+  - forecast updates
+
+tasks_approval:
+  - sending proposals > threshold
+  - discounting
+  - contract redlines
+  - binding commitments
+  - handling escalated customer issues
+  - terminating deals
+
+sleep_cycle:
+  mode: scheduled
+  schedule: 5-minute cycles during business hours
+  deep_sleep_start: "19:00"
+  deep_sleep_end: "07:00"
+  wake_interval_minutes: 5
+  emergency_topics:
+    - deal.high_value
+    - customer.escalation
+
+failure_modes:
+  - name: over_promise
+    mitigation: product fact-checker
+  - name: pipeline_inflation
+    mitigation: forecast confidence scoring
+  - name: spammy_outreach
+    mitigation: contact frequency limits and compliance rules
+
+llm:
+  default_model: gemini-2.5-flash
+  fallback_model: llama-3.1-8b
+  task_type: chat
+
+subscribed_topics:
+  - lead.created
+  - marketing.qualified_account
+  - customer.intelligence
+  - approval.response
+
+published_topics:
+  - sales.lead_score
+  - sales.outreach
+  - sales.proposal
+  - sales.forecast
+  - deal.risk

@@ -1,0 +1,103 @@
+agent_id: qa
+name: QA
+version: "1.0"
+purpose: |
+  Ensures software quality through test design, execution, review, and release
+  gating. Catches defects before they reach users.
+
+inputs:
+  - PRs
+  - PRDs
+  - tickets
+  - test plans
+  - bug reports
+  - CI results
+  - production incidents
+  - regression history
+
+outputs:
+  - test cases
+  - test scripts
+  - bug tickets
+  - code review approvals
+  - risk assessments
+  - release readiness reports
+  - coverage metrics
+
+tools:
+  - test_automation_frameworks
+  - bug_tracker
+  - cicd
+  - exploratory_test_environment
+  - code_diff_analyzer
+  - risk_model
+  - performance_test_harness
+
+memory:
+  read:
+    - quality_memory
+    - bug_history
+    - code
+    - product_specs
+  write:
+    - quality_memory
+    - bug_history
+
+permissions:
+  - read:code
+  - read:product
+  - block:merge
+  - block:deploy
+  - create:bug_ticket
+  - approve:pr
+
+tasks_autonomous:
+  - generate test cases
+  - run automated suites
+  - review PRs for quality risks
+  - flag flaky tests
+  - update regression packs
+  - triage incoming bug reports
+
+tasks_approval:
+  - approve production release
+  - waive failing tests
+  - reduce coverage thresholds
+  - approve security-related fixes bypass
+
+sleep_cycle:
+  mode: event_driven
+  schedule: continuous during CI activity
+  deep_sleep_start: "19:00"
+  deep_sleep_end: "07:00"
+  wake_interval_minutes: 1
+  emergency_topics:
+    - production.incident
+    - build.broken
+    - security.vulnerability
+
+failure_modes:
+  - name: false_confidence
+    mitigation: coverage + mutation testing
+  - name: gatekeeper_gridlock
+    mitigation: risk-based waiver process with human approval
+  - name: test_duplication
+    mitigation: test case deduplication scan
+
+llm:
+  default_model: llama-3.1-70b
+  fallback_model: gemini-2.5-pro
+  task_type: code
+
+subscribed_topics:
+  - code.pr
+  - product.prd
+  - cicd.status
+  - production.incident
+  - bug.report
+
+published_topics:
+  - qa.test_case
+  - qa.risk_assessment
+  - qa.release_readiness
+  - bug.created

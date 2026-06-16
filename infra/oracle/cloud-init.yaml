@@ -1,0 +1,130 @@
+#cloud-config
+package_update: true
+package_upgrade: true
+
+packages:
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - gnupg
+  - lsb-release
+  - software-properties-common
+  - git
+  - htop
+  - vim
+  - ufw
+  - fail2ban
+  - jq
+  - unzip
+  - ncdu
+  - cron
+  - logrotate
+
+users:
+  - default
+  - name: agentos
+    gecos: Agent OS Service User
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    shell: /bin/bash
+    home: /home/agentos
+    lock_passwd: true
+    ssh_authorized_keys:
+      - ssh-ed25519 AAAAC3... agent-os
+
+runcmd:
+  - mkdir -p /data
+  - |
+    DATA_DISK=$(lsblk -dpno NAME,SIZE | grep -E '200G|199G' | awk '{print $1}' | head -n1)
+    if [ -n "$DATA_DISK" ]; then
+      if ! blkid "$DATA_DISK" > /dev/null 2>&1; then
+        mkfs.ext4 "$DATA_DISK"
+      fi
+      echo "$DATA_DISK /data ext4 defaults,noatime,nofail 0 2" >> /etc/fstab
+      mount -a
+    fi
+
+  - install -m 0755 -d /etc/apt/keyrings
+  - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  - chmod a+r /etc/apt/keyrings/docker.gpg
+  - |
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+  - apt-get update
+  - apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+  - usermod -aG docker ubuntu
+  - usermod -aG docker agentos
+  - systemctl enable docker
+  - systemctl start docker
+
+  - |
+    DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
+    mkdir -p $DOCKER_CONFIG/cli-plugins
+    curl -SL https://github.com/docker/compose/releases/download/v2.27.1/docker-compose-linux-aarch64 -o $DOCKER_CONFIG/cli-plugins/docker-compose
+    chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
+    cp $DOCKER_CONFIG/cli-plugins/docker-compose /usr/local/bin/docker-compose
+
+  - curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+  - apt-get install -y nodejs
+  - corepack enable
+  - corepack prepare pnpm@latest --activate
+
+  - curl -fsSL https://tailscale.com/install.sh | sh
+  - systemctl enable tailscaled
+  - systemctl start tailscaled
+
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+
+  - systemctl enable fail2ban
+  - systemctl start fail2ban
+
+  - |
+    mkdir -p /data/apps
+    cd /data/apps
+    git clone https://github.com/YOUR_ORG/agent-os.git agent-os
+    chown -R agentos:agentos /data/apps/agent-os
+
+  - curl -fsSL https://ollama.com/install.sh | sh
+  - systemctl enable ollama
+  - systemctl start ollama
+
+  - mkdir -p /data/agent-os/redis /data/agent-os/neo4j /data/agent-os/ollama /data/agent-os/backups
+  - chown -R agentos:agentos /data/agent-os
+
+  - curl -fsSL https://github.com/restic/restic/releases/download/v0.16.4/restic_0.16.4_linux_arm64.bz2 -o /tmp/restic.bz2
+  - bunzip2 /tmp/restic.bz2
+  - mv /tmp/restic /usr/local/bin/restic
+  - chmod +x /usr/local/bin/restic
+
+  - |
+    cat > /etc/logrotate.d/docker-agentos <<'EOF'
+    /var/log/agent-os/*.log {
+      daily
+      rotate 7
+      compress
+      delaycompress
+      missingok
+      notifempty
+      create 0644 agentos agentos
+    }
+    EOF
+
+  - fallocate -l 8G /swapfile
+  - chmod 600 /swapfile
+  - mkswap /swapfile
+  - swapon /swapfile
+  - echo '/swapfile none swap sw 0 0' >> /etc/fstab
+
+  - apt-get autoremove -y
+  - apt-get clean
+  - reboot
+
+final_message: |
+  Agent OS VM is ready.
+  SSH: ssh ubuntu@$(hostname -I | awk '{print $1}')
+  Docker: $(docker --version)
+  Node: $(node --version)
+  Tailscale: $(tailscale --version | head -n1)

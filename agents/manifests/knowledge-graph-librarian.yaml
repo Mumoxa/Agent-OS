@@ -1,0 +1,101 @@
+agent_id: knowledge_graph_librarian
+name: Knowledge Graph Librarian
+version: "1.0"
+purpose: |
+  Curates the company's semantic memory: entities, relationships, decisions,
+  and institutional knowledge. Ensures all other agents share accurate,
+  up-to-date context.
+
+inputs:
+  - documents
+  - code
+  - tickets
+  - emails
+  - meeting notes
+  - decisions
+  - research outputs
+  - external sources
+  - agent outputs
+
+outputs:
+  - structured entities
+  - relationship maps
+  - decision logs
+  - knowledge graph updates
+  - inconsistency alerts
+  - ontology changes
+  - search index
+
+tools:
+  - knowledge_graph_db
+  - nlp_extractor
+  - document_parser
+  - vector_store
+  - search_engine
+  - ontology_editor
+  - entity_resolver
+  - link_validator
+
+memory:
+  read:
+    - knowledge_graph:all
+    - audit_logs
+  write:
+    - knowledge_graph
+
+permissions:
+  - read:shared_memory
+  - write:knowledge_graph
+  - enforce:schema
+  - approval:read
+
+tasks_autonomous:
+  - extracting entities from documents
+  - linking related concepts
+  - resolving duplicates
+  - updating decision logs
+  - maintaining search index
+  - detecting contradictions
+  - archiving stale knowledge
+
+tasks_approval:
+  - ontology changes
+  - deleting historical records
+  - merging conflicting canonical entities
+  - changing PII handling rules
+  - granting memory access to new agents
+
+sleep_cycle:
+  mode: scheduled
+  schedule: hourly consolidation
+  deep_sleep_start: "01:00"
+  deep_sleep_end: "05:00"
+  wake_interval_minutes: 60
+  emergency_topics:
+    - knowledge.storm
+    - contradiction.critical
+
+failure_modes:
+  - name: knowledge_drift
+    mitigation: temporal versioning and source attribution
+  - name: entity_collapse
+    mitigation: entity resolution confidence threshold
+  - name: contradiction_blindness
+    mitigation: contradiction detector and alert
+
+llm:
+  default_model: gemini-2.5-pro
+  fallback_model: deepseek-v3
+  task_type: reasoning
+
+subscribed_topics:
+  - agent.output
+  - document.created
+  - decision.made
+  - approval.response
+
+published_topics:
+  - knowledge.entity
+  - knowledge.decision
+  - knowledge.contradiction
+  - knowledge.search_index

@@ -1,0 +1,133 @@
+name: Deploy to Oracle VM
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Type check
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Build Docker images
+        run: |
+          docker build -t agent-os-api:${{ github.sha }} ./apps/api
+          docker build -t agent-os-worker:${{ github.sha }} ./apps/api -f ./apps/api/Dockerfile.worker
+          docker build -t agent-os-llm-router:${{ github.sha }} ./apps/llm-router
+
+      - name: Save images as artifacts
+        run: |
+          mkdir -p /tmp/images
+          docker save agent-os-api:${{ github.sha }} > /tmp/images/api.tar
+          docker save agent-os-worker:${{ github.sha }} > /tmp/images/worker.tar
+          docker save agent-os-llm-router:${{ github.sha }} > /tmp/images/llm-router.tar
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: docker-images
+          path: /tmp/images/*.tar
+          retention-days: 1
+
+  deploy:
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download Docker images
+        uses: actions/download-artifact@v4
+        with:
+          name: docker-images
+          path: /tmp/images
+
+      - name: Setup SSH
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.OCI_SSH_KEY }}
+          log-public-key: false
+
+      - name: Add host to known_hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H ${{ secrets.OCI_HOST }} >> ~/.ssh/known_hosts
+
+      - name: Copy project files to VM
+        run: |
+          rsync -avz --delete \
+            --exclude node_modules \
+            --exclude .git \
+            --exclude dist \
+            --exclude .env \
+            --exclude infra/oracle/.terraform \
+            --exclude infra/oracle/*.tfstate* \
+            ./ ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }}:/data/apps/agent-os
+
+      - name: Decode .env file on VM
+        run: |
+          ssh ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} "
+            echo '${{ secrets.ENV_FILE }}' | base64 -d > /data/apps/agent-os/.env
+            chmod 600 /data/apps/agent-os/.env
+          "
+
+      - name: Copy images to VM and load
+        run: |
+          scp /tmp/images/*.tar ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }}:/tmp/
+          ssh ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} "
+            docker load -i /tmp/api.tar
+            docker load -i /tmp/worker.tar
+            docker load -i /tmp/llm-router.tar
+            docker tag agent-os-api:${{ github.sha }} agent-os-api:latest
+            docker tag agent-os-worker:${{ github.sha }} agent-os-worker:latest
+            docker tag agent-os-llm-router:${{ github.sha }} agent-os-llm-router:latest
+            rm -f /tmp/*.tar
+          "
+
+      - name: Deploy stack on VM
+        run: |
+          ssh ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} "
+            cd /data/apps/agent-os
+            docker compose down
+            docker compose up -d
+            docker system prune -f
+          "
+
+      - name: Health check
+        run: |
+          sleep 15
+          ssh ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} "
+            curl -fsS http://localhost:3000/health && echo 'API OK'
+            curl -fsS http://localhost:4000/health && echo 'LLM Router OK'
+          "
+
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "Deployment failed. Check logs on the VM: ssh ${{ secrets.OCI_USER }}@${{ secrets.OCI_HOST }} 'docker compose logs'"

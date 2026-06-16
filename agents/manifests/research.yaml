@@ -1,0 +1,99 @@
+agent_id: research
+name: Research
+version: "1.0"
+purpose: |
+  Explores technology, market, and scientific frontiers. Produces intelligence
+  that feeds product, strategy, and engineering decisions.
+
+inputs:
+  - research questions
+  - papers
+  - patents
+  - web sources
+  - internal experiments
+  - conference proceedings
+  - competitor products
+  - technical debt reports
+
+outputs:
+  - research summaries
+  - technology landscape maps
+  - feasibility reports
+  - benchmark results
+  - proposed experiments
+  - patent prior-art searches
+  - technical briefs
+
+tools:
+  - web_search
+  - paper_databases
+  - code_benchmarking
+  - sandbox_environments
+  - citation_manager
+  - knowledge_graph
+  - survey_builders
+  - llm_evaluation_harness
+
+memory:
+  read:
+    - research_memory
+    - product_memory
+    - engineering_memory
+  write:
+    - research_memory
+
+permissions:
+  - run:sandboxed_experiments
+  - read:research_sources
+  - budget:research:$500
+  - approval:read
+
+tasks_autonomous:
+  - literature reviews
+  - competitive teardowns
+  - benchmark runs
+  - tech watch
+  - summarizing papers
+  - maintaining research backlog
+  - proposing experiments
+
+tasks_approval:
+  - external publication
+  - hiring contractors for research
+  - procuring >$500/month data sources
+  - running experiments that use customer data
+  - patent filings
+
+sleep_cycle:
+  mode: scheduled
+  schedule: 30-minute cycles
+  deep_sleep_start: "23:00"
+  deep_sleep_end: "05:00"
+  wake_interval_minutes: 30
+  emergency_topics:
+    - research.critical_request
+    - founder.directive
+
+failure_modes:
+  - name: research_rabbit_hole
+    mitigation: fixed-duration sprints with deliverables
+  - name: outdated_sources
+    mitigation: source freshness scoring
+  - name: bench_marketing
+    mitigation: benchmark review by Engineering Agent
+
+llm:
+  default_model: gemini-2.5-pro
+  fallback_model: deepseek-v3
+  task_type: reasoning
+
+subscribed_topics:
+  - product.question
+  - engineering.question
+  - founder.directive
+
+published_topics:
+  - research.brief
+  - research.benchmark
+  - experiment.proposed
+  - tech.landscape

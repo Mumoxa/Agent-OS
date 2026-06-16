@@ -1,0 +1,228 @@
+version: '3.8'
+
+services:
+  # ---------------------------------------------------------
+  # API Gateway
+  # ---------------------------------------------------------
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: agent-os-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - NEO4J_URL=${NEO4J_URL}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - LLM_ROUTER_URL=${LLM_ROUTER_URL}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - redis
+      - neo4j
+      - llm-router
+    networks:
+      - agentos
+    read_only: true
+    user: "1000:1000"
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ---------------------------------------------------------
+  # Background Worker
+  # ---------------------------------------------------------
+  worker:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile.worker
+    container_name: agent-os-worker
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - NEO4J_URL=${NEO4J_URL}
+      - NEO4J_USER=${NEO4J_USER}
+      - NEO4J_PASSWORD=${NEO4J_PASSWORD}
+      - LLM_ROUTER_URL=${LLM_ROUTER_URL}
+      - CLERK_SECRET_KEY=${CLERK_SECRET_KEY}
+      - JWT_SECRET=${JWT_SECRET}
+    depends_on:
+      - redis
+      - neo4j
+      - llm-router
+    networks:
+      - agentos
+    read_only: true
+    user: "1000:1000"
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    cap_drop:
+      - ALL
+
+  # ---------------------------------------------------------
+  # Free LLM Router
+  # ---------------------------------------------------------
+  llm-router:
+    build:
+      context: ./apps/llm-router
+      dockerfile: Dockerfile
+    container_name: agent-os-llm-router
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - REDIS_URL=${REDIS_URL}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - CEREBRAS_API_KEY=${CEREBRAS_API_KEY}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
+      - OLLAMA_URL=${OLLAMA_URL}
+    depends_on:
+      - redis
+      - ollama
+    networks:
+      - agentos
+    read_only: true
+    user: "1000:1000"
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    cap_drop:
+      - ALL
+
+  # ---------------------------------------------------------
+  # Agent Runtime
+  # ---------------------------------------------------------
+  runtime:
+    build:
+      context: ./apps/runtime
+      dockerfile: Dockerfile
+    container_name: agent-os-runtime
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - REDIS_URL=${REDIS_URL}
+      - LLM_ROUTER_URL=${LLM_ROUTER_URL}
+      - ORG_ID=${ORG_ID}
+      - MANIFESTS_DIR=/data/apps/agent-os/agents/manifests
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_OWNER=${GITHUB_OWNER}
+      - GITHUB_REPO=${GITHUB_REPO}
+    volumes:
+      - ./agents/manifests:/data/apps/agent-os/agents/manifests:ro
+    depends_on:
+      - redis
+      - llm-router
+    networks:
+      - agentos
+    read_only: true
+    user: "1000:1000"
+    tmpfs:
+      - /tmp:noexec,nosuid,size=100m
+    cap_drop:
+      - ALL
+
+  # ---------------------------------------------------------
+  # Redis (event bus + queue + cache)
+  # ---------------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: agent-os-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    volumes:
+      - redis_data:/data
+    networks:
+      - agentos
+    cap_drop:
+      - ALL
+
+  # ---------------------------------------------------------
+  # Neo4j Community (knowledge graph)
+  # ---------------------------------------------------------
+  neo4j:
+    image: neo4j:5-community
+    container_name: agent-os-neo4j
+    restart: unless-stopped
+    environment:
+      - NEO4J_AUTH=${NEO4J_USER}/${NEO4J_PASSWORD}
+      - NEO4J_PLUGINS=["apoc"]
+      - NEO4J_dbms_memory_heap_max__size=2G
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - agentos
+    cap_drop:
+      - ALL
+
+  # ---------------------------------------------------------
+  # Ollama (local LLM)
+  # ---------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: agent-os-ollama
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_ORIGINS=*
+    networks:
+      - agentos
+    cap_drop:
+      - ALL
+    # On ARM VM, this runs on CPU. For GPU, add runtime: nvidia.
+    deploy:
+      resources:
+        limits:
+          memory: 8G
+
+  # ---------------------------------------------------------
+  # Nginx reverse proxy (only used in production)
+  # ---------------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: agent-os-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./infra/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./infra/nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    networks:
+      - agentos
+    cap_drop:
+      - ALL
+    profiles:
+      - prod
+
+volumes:
+  redis_data:
+  neo4j_data:
+  ollama_data:
+
+networks:
+  agentos:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

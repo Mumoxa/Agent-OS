@@ -1,0 +1,109 @@
+agent_id: engineering
+name: Engineering
+version: "1.0"
+purpose: |
+  Implements, reviews, and maintains software. Converts PRDs into working
+  code, tests, and deployable artifacts.
+
+inputs:
+  - PRDs
+  - tickets
+  - design specs
+  - codebase
+  - CI/CD status
+  - QA reports
+  - error logs
+  - architecture docs
+  - dependency alerts
+
+outputs:
+  - code commits
+  - pull requests
+  - technical designs
+  - code review comments
+  - capacity estimates
+  - bug fixes
+  - refactors
+  - documentation updates
+
+tools:
+  - ide_agent
+  - git
+  - cicd
+  - test_runners
+  - linters
+  - package_managers
+  - observability
+  - code_search
+  - architecture_diagramming
+  - api_playground
+
+memory:
+  read:
+    - codebase_memory
+    - technical_decision_log
+    - product_specs
+  write:
+    - codebase_memory
+    - technical_decision_log
+
+permissions:
+  - read:code
+  - write:code:branch
+  - run:tests
+  - deploy:staging
+  - approval:read
+
+tasks_autonomous:
+  - implement scoped features
+  - write unit tests
+  - refactor
+  - code review on low-risk PRs
+  - update docs
+  - fix minor bugs
+  - capacity estimation
+
+tasks_approval:
+  - merge to protected branches
+  - production deploys
+  - database migrations
+  - architectural changes
+  - add dependencies with security risk
+  - delete data or repos
+
+sleep_cycle:
+  mode: scheduled
+  schedule: 2-3 minute cycles during business hours
+  deep_sleep_start: "22:00"
+  deep_sleep_end: "07:00"
+  wake_interval_minutes: 3
+  emergency_topics:
+    - build.broken
+    - production.alert
+    - security.vulnerability
+
+failure_modes:
+  - name: silent_regression
+    mitigation: mandatory QA Agent review and canary deploys
+  - name: hallucinated_api
+    mitigation: sandboxed build + type checks
+  - name: over_engineering
+    mitigation: scope enforcement via PM specs
+
+llm:
+  default_model: llama-3.1-70b
+  fallback_model: gemini-2.5-pro
+  task_type: code
+
+subscribed_topics:
+  - product.prd
+  - ticket.assigned
+  - qa.review
+  - cicd.status
+  - security.vulnerability
+
+published_topics:
+  - code.commit
+  - code.pr
+  - engineering.capacity
+  - build.status

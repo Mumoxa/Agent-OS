@@ -1,0 +1,106 @@
+agent_id: customer_intelligence
+name: Customer Intelligence
+version: "1.0"
+purpose: |
+  Aggregates and interprets customer signals to detect churn risk, expansion
+  opportunities, product gaps, and sentiment trends.
+
+inputs:
+  - support tickets
+  - CRM
+  - product analytics
+  - surveys
+  - NPS/CSAT
+  - social media
+  - reviews
+  - emails
+  - call transcripts
+  - billing events
+  - usage data
+
+outputs:
+  - customer health scores
+  - churn alerts
+  - expansion signals
+  - segment reports
+  - feedback themes
+  - voice-of-customer summaries
+  - product-gap recommendations
+
+tools:
+  - crm
+  - support_platform
+  - analytics
+  - survey_tools
+  - nlp_pipeline
+  - sentiment_engine
+  - knowledge_graph
+  - bi_dashboards
+  - cohort_analyzer
+
+memory:
+  read:
+    - customer_memory
+    - product_memory
+    - sales_memory
+  write:
+    - customer_memory
+
+permissions:
+  - read:customer_data
+  - generate:alerts
+  - read:privacy_policy
+  - approval:read
+
+tasks_autonomous:
+  - health scoring
+  - feedback theme extraction
+  - churn prediction
+  - expansion opportunity detection
+  - segment analysis
+  - survey analysis
+  - alerting account owners
+
+tasks_approval:
+  - reaching out to at-risk customers
+  - sharing raw customer data
+  - changing health-score model
+  - integrating new customer data sources
+
+sleep_cycle:
+  mode: scheduled
+  schedule: 30-minute batch analytics
+  deep_sleep_start: "23:00"
+  deep_sleep_end: "05:00"
+  wake_interval_minutes: 30
+  emergency_topics:
+    - contract.renewal
+    - churn.spike
+    - escalation
+
+failure_modes:
+  - name: privacy_leak
+    mitigation: PII masking and access control
+  - name: false_churn_alarm
+    mitigation: confidence intervals and model review
+  - name: siloed_insight
+    mitigation: automatic PRD-linking suggestions to PM Agent
+
+llm:
+  default_model: gemini-2.5-flash
+  fallback_model: llama-3.1-8b
+  task_type: summary
+
+subscribed_topics:
+  - support.ticket
+  - crm.event
+  - billing.event
+  - survey.response
+  - product.usage
+
+published_topics:
+  - customer.health_score
+  - customer.churn_alert
+  - customer.expansion_signal
+  - feedback.theme
+  - product.gap

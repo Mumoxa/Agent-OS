@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agent-os.example.com/schemas/agent-manifest.json",
+  "title": "Agent OS Agent Manifest",
+  "type": "object",
+  "required": ["agent_id", "name", "version", "purpose", "inputs", "outputs", "tools", "memory", "permissions", "tasks_autonomous", "tasks_approval", "sleep_cycle", "failure_modes"],
+  "properties": {
+    "agent_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9_]+$"
+    },
+    "name": { "type": "string" },
+    "version": { "type": "string" },
+    "purpose": { "type": "string" },
+    "inputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "outputs": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tools": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "memory": {
+      "type": "object",
+      "required": ["read", "write"],
+      "properties": {
+        "read": { "type": "array", "items": { "type": "string" } },
+        "write": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "permissions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tasks_autonomous": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "tasks_approval": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "sleep_cycle": {
+      "type": "object",
+      "required": ["mode", "schedule"],
+      "properties": {
+        "mode": { "enum": ["continuous", "scheduled", "event_driven"] },
+        "schedule": { "type": "string" },
+        "deep_sleep_start": { "type": "string" },
+        "deep_sleep_end": { "type": "string" },
+        "wake_interval_minutes": { "type": "number" },
+        "emergency_topics": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "mitigation"],
+        "properties": {
+          "name": { "type": "string" },
+          "mitigation": { "type": "string" }
+        }
+      }
+    },
+    "llm": {
+      "type": "object",
+      "properties": {
+        "default_model": { "type": "string" },
+        "fallback_model": { "type": "string" },
+        "task_type": { "type": "string" }
+      }
+    },
+    "subscribed_topics": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "published_topics": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

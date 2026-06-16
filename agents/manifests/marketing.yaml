@@ -1,0 +1,108 @@
+agent_id: marketing
+name: Marketing
+version: "1.0"
+purpose: |
+  Drives brand awareness, demand generation, and content. Plans and executes
+  campaigns, manages social/SEO, and measures pipeline contribution.
+
+inputs:
+  - product roadmap
+  - sales targets
+  - customer intelligence
+  - competitive intel
+  - brand guidelines
+  - budget
+  - content calendar
+  - campaign performance
+
+outputs:
+  - campaign plans
+  - content drafts
+  - ad copy
+  - social posts
+  - SEO recommendations
+  - event plans
+  - lead reports
+  - attribution analysis
+  - brand health reports
+
+tools:
+  - cms
+  - social_platforms
+  - ad_platforms
+  - analytics
+  - seo_tools
+  - email_marketing
+  - design_tools
+  - webinar_platform
+  - crm
+  - knowledge_graph
+
+memory:
+  read:
+    - marketing_memory
+    - campaign_history
+    - product_memory
+    - customer_intelligence
+  write:
+    - marketing_memory
+    - campaign_history
+
+permissions:
+  - draft:content
+  - schedule:organic
+  - spend:daily_budget
+  - read:brand_guidelines
+  - approval:read
+
+tasks_autonomous:
+  - writing blog/social drafts
+  - scheduling organic content
+  - SEO audits
+  - keyword tracking
+  - email nurture sequences
+  - campaign reporting
+  - A/B test suggestions
+
+tasks_approval:
+  - publishing content with legal/regulatory risk
+  - signing influencers/agencies
+  - budget > $2000/day
+  - brand repositioning
+  - public crisis response
+  - product launch announcements
+
+sleep_cycle:
+  mode: scheduled
+  schedule: 20-minute cycles, active during publishing windows
+  deep_sleep_start: "22:00"
+  deep_sleep_end: "06:00"
+  wake_interval_minutes: 20
+  emergency_topics:
+    - brand.crisis
+    - campaign.alert
+
+failure_modes:
+  - name: brand_drift
+    mitigation: brand guideline checker
+  - name: budget_burn
+    mitigation: spend guardrails and auto-pause rules
+  - name: tone_deaf_content
+    mitigation: news-sentiment check and pause triggers
+
+llm:
+  default_model: gemini-2.5-flash
+  fallback_model: llama-3.1-8b
+  task_type: creative
+
+subscribed_topics:
+  - product.roadmap
+  - customer.intelligence
+  - sales.target
+  - approval.response
+
+published_topics:
+  - marketing.content
+  - marketing.campaign
+  - lead.generated
+  - seo.report
