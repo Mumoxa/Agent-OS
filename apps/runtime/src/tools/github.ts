@@ -1,4 +1,4 @@
-import { ToolRegistry, ToolContext } from './ToolRegistry.js';
+import { ToolRegistry } from './ToolRegistry.js';
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN;
 const GITHUB_OWNER = process.env.GITHUB_OWNER;
@@ -35,7 +35,7 @@ export function registerGitHubTools(registry: ToolRegistry): void {
         throw new Error(`GitHub issue creation failed: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
       return { issue_number: data.number, url: data.html_url };
     },
   });
@@ -61,7 +61,7 @@ export function registerGitHubTools(registry: ToolRegistry): void {
         }
       );
       if (!baseResponse.ok) throw new Error('Failed to get base branch');
-      const baseData = await baseResponse.json();
+      const baseData = await baseResponse.json() as any;
       const sha = baseData.object.sha;
 
       const response = await fetch(
@@ -115,7 +115,7 @@ export function registerGitHubTools(registry: ToolRegistry): void {
         throw new Error(`GitHub PR creation failed: ${response.status}`);
       }
 
-      const data = await response.json();
+      const data = await response.json() as any;
       return { pr_number: data.number, url: data.html_url };
     },
   });

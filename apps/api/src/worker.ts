@@ -1,9 +1,9 @@
 import { config } from './config.js';
 import { Queue } from 'bullmq';
-import IORedis from 'ioredis';
 
-const redis = new IORedis(config.REDIS_URL, { maxRetriesPerRequest: null });
-const agentQueue = new Queue('agent-runs', { connection: redis });
+const agentQueue = new Queue('agent-runs', {
+  connection: { url: config.REDIS_URL, maxRetriesPerRequest: null },
+});
 
 async function main() {
   console.log('Agent OS worker started');

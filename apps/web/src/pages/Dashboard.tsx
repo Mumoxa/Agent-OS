@@ -1,5 +1,4 @@
 import { AgentCard } from '../components/AgentCard.js';
-import { StatusBadge } from '../components/StatusBadge.js';
 import { WorkflowPanel } from '../components/WorkflowPanel.js';
 import { useSSE } from '../hooks/useSSE.js';
 import { Bell, AlertTriangle, Radio } from 'lucide-react';

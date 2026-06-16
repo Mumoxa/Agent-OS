@@ -30,7 +30,7 @@ export function useSSE(options: SSEOptions) {
         const data = JSON.parse(event.data);
         setLastEvent(data);
         options.onMessage?.(data);
-      } catch (err) {
+      } catch {
         console.error('Failed to parse SSE message:', event.data);
       }
     };
@@ -50,7 +50,7 @@ export function useSSE(options: SSEOptions) {
         const data = JSON.parse(event.data);
         setLastEvent(data);
         options.onEvent?.(topic, data);
-      } catch (err) {
+      } catch {
         console.error(`Failed to parse ${topic} event:`, event.data);
       }
     }

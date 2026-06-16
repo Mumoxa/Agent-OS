@@ -4,11 +4,11 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint src --ext .ts,.tsx"
+    "dev": "node ../../scripts/web-vite.mjs dev",
+    "build": "node ../../node_modules/typescript/bin/tsc && node ../../scripts/web-vite.mjs build",
+    "preview": "node ../../scripts/web-vite.mjs preview",
+    "typecheck": "node ../../node_modules/typescript/bin/tsc --noEmit",
+    "lint": "node ../../node_modules/eslint/bin/eslint.js src"
   },
   "dependencies": {
     "react": "^18.3.1",

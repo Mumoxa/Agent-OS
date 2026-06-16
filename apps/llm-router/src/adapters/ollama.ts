@@ -34,7 +34,7 @@ export class OllamaAdapter extends BaseAdapter {
       throw new Error(`Ollama error ${response.status}: ${text}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     return {
       id: data.id,
       object: 'chat.completion',
@@ -42,7 +42,6 @@ export class OllamaAdapter extends BaseAdapter {
       model: data.model,
       routed_via: this.id,
       cost_usd: 0,
-      local: true,
       usage: data.usage ?? { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 },
       choices: data.choices,
     };

@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:e2e": "docker compose -f ../../docker-compose.yml up -d && vitest run && docker compose -f ../../docker-compose.yml down"
+    "test": "node ./run-if-enabled.mjs",
+    "test:watch": "node ../../node_modules/vitest/vitest.mjs",
+    "test:e2e": "docker compose -f ../../docker-compose.yml up -d && E2E_ENABLED=true node ../../node_modules/vitest/vitest.mjs run && docker compose -f ../../docker-compose.yml down"
   },
   "devDependencies": {
     "@playwright/test": "^1.45.0",

@@ -1,4 +1,4 @@
-import neo4j, { Driver, Session, Record as Neo4jRecord } from 'neo4j-driver';
+import neo4j, { Driver, Record as Neo4jRecord } from 'neo4j-driver';
 import { config } from '../config.js';
 
 let driver: Driver;

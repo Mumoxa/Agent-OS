@@ -6,8 +6,8 @@ services:
   # ---------------------------------------------------------
   api:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/api/Dockerfile
     container_name: agent-os-api
     restart: unless-stopped
     ports:
@@ -48,8 +48,8 @@ services:
   # ---------------------------------------------------------
   worker:
     build:
-      context: ./apps/api
-      dockerfile: Dockerfile.worker
+      context: .
+      dockerfile: apps/api/Dockerfile.worker
     container_name: agent-os-worker
     restart: unless-stopped
     environment:
@@ -80,8 +80,8 @@ services:
   # ---------------------------------------------------------
   llm-router:
     build:
-      context: ./apps/llm-router
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/llm-router/Dockerfile
     container_name: agent-os-llm-router
     restart: unless-stopped
     ports:
@@ -112,8 +112,8 @@ services:
   # ---------------------------------------------------------
   runtime:
     build:
-      context: ./apps/runtime
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: apps/runtime/Dockerfile
     container_name: agent-os-runtime
     restart: unless-stopped
     environment:

@@ -1,6 +1,6 @@
 import { BaseAdapter } from './base.js';
 import { ChatRequest, ChatResponse } from '../types.js';
-import { config } from '../config.js';
+import { config, providers } from '../config.js';
 
 export class GroqAdapter extends BaseAdapter {
   id = 'groq';
@@ -8,7 +8,7 @@ export class GroqAdapter extends BaseAdapter {
   async chat(request: ChatRequest, modelName: string): Promise<ChatResponse> {
     if (!config.GROQ_API_KEY) throw new Error('Groq API key not configured');
 
-    const response = await fetch(`${config.providers[1].baseUrl}/chat/completions`, {
+    const response = await fetch(`${providers[1].baseUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -28,7 +28,7 @@ export class GroqAdapter extends BaseAdapter {
       throw new Error(`Groq error ${response.status}: ${text}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as any;
     return {
       id: data.id,
       object: 'chat.completion',

@@ -1,5 +1,5 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import IORedis from 'ioredis';
+import { Redis } from 'ioredis';
 
 interface Client {
   id: string;
@@ -10,11 +10,11 @@ interface Client {
 
 export class SSEManager {
   private clients = new Map<string, Client>();
-  private redis: IORedis;
+  private redis: Redis;
   private running = false;
 
   constructor(redisUrl: string) {
-    this.redis = new IORedis(redisUrl, { maxRetriesPerRequest: null });
+    this.redis = new Redis(redisUrl, { maxRetriesPerRequest: null });
   }
 
   async start(): Promise<void> {
@@ -59,7 +59,7 @@ export class SSEManager {
       try {
         client.reply.raw.write(`event: ${topic}\n`);
         client.reply.raw.write(`data: ${JSON.stringify(event)}\n\n`);
-      } catch (err) {
+      } catch {
         this.clients.delete(client.id);
       }
     }
@@ -72,12 +72,15 @@ export class SSEManager {
 
     while (this.running) {
       try {
-        const args: (string | number)[] = [];
-        for (const topic of topics) {
-          args.push('STREAMS', topic, lastIds[topic]);
-        }
-
-        const result = await this.redis.xread('COUNT', 10, 'BLOCK', 1000, ...args);
+        const result = await this.redis.xread(
+          'COUNT',
+          10,
+          'BLOCK',
+          1000,
+          'STREAMS',
+          ...topics,
+          ...topics.map((topic) => lastIds[topic])
+        );
         if (!result) continue;
 
         for (const [topic, messages] of result) {

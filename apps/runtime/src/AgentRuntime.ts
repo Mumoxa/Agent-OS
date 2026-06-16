@@ -1,5 +1,5 @@
 import { Queue, Worker } from 'bullmq';
-import IORedis from 'ioredis';
+import { Redis } from 'ioredis';
 import { randomUUID } from 'crypto';
 import { AgentManifest, Agent, AgentInput, AgentOutput, AgentEvent, AgentContext } from './types.js';
 import { ManifestLoader } from './ManifestLoader.js';
@@ -25,7 +25,7 @@ interface RuntimeConfig {
 }
 
 export class AgentRuntime {
-  private redis: IORedis;
+  private redis: Redis;
   private queue: Queue;
   private worker?: Worker;
   private agents = new Map<string, Agent>();
@@ -35,8 +35,10 @@ export class AgentRuntime {
   private toolRegistry: ToolRegistry;
 
   constructor(private config: RuntimeConfig) {
-    this.redis = new IORedis(config.redisUrl, { maxRetriesPerRequest: null });
-    this.queue = new Queue('agent-runs', { connection: this.redis });
+    this.redis = new Redis(config.redisUrl, { maxRetriesPerRequest: null });
+    this.queue = new Queue('agent-runs', {
+      connection: { url: config.redisUrl, maxRetriesPerRequest: null },
+    });
     this.manifestLoader = new ManifestLoader(config.manifestsDir);
     this.securityMonitor = new SecurityMonitor({
       redisUrl: config.redisUrl,
@@ -67,7 +69,7 @@ export class AgentRuntime {
         const { agent_id, input, run_id } = job.data;
         await this.executeAgent(agent_id, input, run_id);
       },
-      { connection: this.redis }
+      { connection: { url: this.config.redisUrl, maxRetriesPerRequest: null } }
     );
 
     this.startScheduler();
@@ -220,7 +222,7 @@ export class AgentRuntime {
           }),
         });
         if (!response.ok) throw new Error(`LLM router error: ${response.status}`);
-        const data = await response.json();
+        const data = await response.json() as any;
         return { content: data.choices[0]?.message?.content ?? '', usage: data.usage };
       },
       memory: {

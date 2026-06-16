@@ -12,34 +12,28 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
 
       - name: Type check
-        run: pnpm typecheck
+        run: npm run typecheck
 
       - name: Lint
-        run: pnpm lint
+        run: npm run lint
 
       - name: Build packages
-        run: pnpm build
+        run: npm run build
 
       - name: Build Docker images
         run: |
-          docker build -t agent-os-api:${{ github.sha }} ./apps/api
-          docker build -t agent-os-worker:${{ github.sha }} ./apps/api -f ./apps/api/Dockerfile.worker
-          docker build -t agent-os-llm-router:${{ github.sha }} ./apps/llm-router
+          docker build -t agent-os-api:${{ github.sha }} -f apps/api/Dockerfile .
+          docker build -t agent-os-worker:${{ github.sha }} -f apps/api/Dockerfile.worker .
+          docker build -t agent-os-llm-router:${{ github.sha }} -f apps/llm-router/Dockerfile .
 
       - name: Save images as artifacts
         run: |
