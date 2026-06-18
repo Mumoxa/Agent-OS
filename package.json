@@ -26,5 +26,13 @@
   "workspaces": [
     "apps/*",
     "tests/*"
-  ]
+  ],
+  "overrides": {
+    "@vitejs/plugin-react": {
+      "vite": "^6.4.3"
+    },
+    "vite-plugin-pwa": {
+      "vite": "^6.4.3"
+    }
+  }
 }
